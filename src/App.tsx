@@ -1,34 +1,28 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+// src/App.tsx を簡単に修正して確認
 import './App.css'
+import { CommonButton, InputForm } from './components/atoms'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div>
+      <h1>Todo App Development Started!</h1>
+      <p>Atomic Design Pattern</p>
+
+      {/* <div className="input-form"> */}
+        <InputForm 
+          placeholder="Todoを入力してください"
+          onChange={() => {}}
+          onKeyDown={() => {}}
+        />
+
+      <section>
+        <h2>Buttons area</h2>
+        <CommonButton>Primary</CommonButton>
+        <CommonButton disabled>Disabled</CommonButton>
+      </section>
+        <CommonButton>ボタン</CommonButton>
+      {/* </div> */}
+    </div>
   )
 }
 
