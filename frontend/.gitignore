@@ -1,0 +1,28 @@
+# Build outputs
+dist/
+build/
+.vite/
+
+# Development
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Storybook
+storybook-static/
+*storybook.log
+
+# Testing
+coverage/
+.nyc_output/
+
+# Vite
+vite.config.ts.timestamp-*
+
+# TypeScript
+*.tsbuildinfo
+
+# IDE
+.vscode/settings.json
+.vscode/launch.json

@@ -1,0 +1,22 @@
+# Build outputs
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.development
+.env.production
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+*.log
+
+# Prisma
+prisma/migrations/dev.db*
+
+# TypeScript
+*.tsbuildinfo

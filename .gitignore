@@ -27,3 +27,13 @@ dist-ssr
 
 *storybook.log
 storybook-static
+
+# Editor
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary
+*.tmp
+*.temp
