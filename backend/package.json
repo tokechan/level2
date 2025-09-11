@@ -7,9 +7,9 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "generate:api": "openapi-generator-cli generate -i openapi.yaml -g typescript-fetch -o ../frontend/src/api --additional-properties=typescriptThreePlus=true",
-    "generate:types": "openapi-generator-cli generate -i openapi.yaml -g typescript-node -o ./src/types/generated",
-    "validate:api": "openapi-generator-cli validate -i openapi.yaml"
+    "generate:types": "openapi-typescript openapi.yaml -o ./src/types/api.ts",
+    "generate:frontend-types": "openapi-typescript openapi.yaml -o ../frontend/src/types/api.ts",
+    "generate:all": "npm run generate:types && npm run generate:frontend-types"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^12.0.0",
