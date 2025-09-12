@@ -17,28 +17,34 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
         run: |
+          echo "Installing backend dependencies..."
           cd backend && npm install
+          echo "Installing frontend dependencies..."
           cd ../frontend && npm install
 
       - name: Generate types
         run: |
+          echo "Generating types from OpenAPI spec..."
           cd backend && npm run generate:all
 
       - name: Type check backend
         run: |
+          echo "Type checking backend..."
           cd backend && npm run build
 
       - name: Type check frontend
         run: |
+          echo "Type checking frontend..."
           cd frontend && npx tsc --noEmit
 
       - name: Run type generation test
         run: |
+          echo "Running type generation test..."
           cd backend && npm run test:types
 
       - name: Check for type errors
