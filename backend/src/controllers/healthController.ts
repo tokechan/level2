@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
-import { HealthResponse } from '../types/api.js';
+import type { components } from '../types/api.js';
+
+type HealthResponse = components['schemas']['HealthResponse'];
 
 export const healthCheck = (req: Request, res: Response): void => {
   const healthResponse: HealthResponse = {

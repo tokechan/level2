@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { z, ZodSchema } from 'zod';
-import { ErrorResponse } from '../types/api.js';
+import type { components } from '../types/api.js';
+
+type ErrorResponse = components['schemas']['ErrorResponse'];
 
 export const validateRequest = (schema: {
   body?: ZodSchema;
