@@ -1,5 +1,5 @@
 import type { components } from '../types/api.js';
-import type { User as PrismaUser } from '@prisma/client';
+import type { User as PrismaUser } from '../generated/prisma/index.js';
 
 type User = components['schemas']['User'];
 
