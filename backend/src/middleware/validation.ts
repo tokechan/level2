@@ -1,71 +1,75 @@
 import { Request, Response, NextFunction } from 'express';
+import { z, ZodSchema } from 'zod';
 import { ErrorResponse } from '../types/api.js';
 
 export const validateRequest = (schema: {
-  body?: any;
-  query?: any;
-  params?: any;
+  body?: ZodSchema;
+  query?: ZodSchema;
+  params?: ZodSchema;
 }) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     try {
       // Body validation
       if (schema.body) {
-        const { error } = schema.body.validate(req.body);
-        if (error) {
+        const result = schema.body.safeParse(req.body);
+        if (!result.success) {
           const errorResponse: ErrorResponse = {
             success: false,
             error: {
               message: 'Validation error',
               code: 'VALIDATION_ERROR',
               details: {
-                field: error.details[0].path.join('.'),
-                reason: error.details[0].message
+                field: result.error.errors[0].path.join('.'),
+                reason: result.error.errors[0].message
               }
             }
           };
           res.status(400).json(errorResponse);
           return;
         }
+        req.body = result.data;
       }
 
       // Query validation
       if (schema.query) {
-        const { error } = schema.query.validate(req.query);
-        if (error) {
+        const result = schema.query.safeParse(req.query);
+        if (!result.success) {
           const errorResponse: ErrorResponse = {
             success: false,
             error: {
               message: 'Query validation error',
               code: 'QUERY_VALIDATION_ERROR',
               details: {
-                field: error.details[0].path.join('.'),
-                reason: error.details[0].message
+                field: result.error.errors[0].path.join('.'),
+                reason: result.error.errors[0].message
               }
             }
           };
           res.status(400).json(errorResponse);
           return;
         }
+        req.query = result.data;
       }
 
       // Params validation
       if (schema.params) {
-        const { error } = schema.params.validate(req.params);
-        if (error) {
+        const result = schema.params.safeParse(req.params);
+        if (!result.success) {
           const errorResponse: ErrorResponse = {
             success: false,
             error: {
               message: 'Parameter validation error',
               code: 'PARAM_VALIDATION_ERROR',
               details: {
-                field: error.details[0].path.join('.'),
-                reason: error.details[0].message
+                field: result.error.errors[0].path.join('.'),
+                reason: result.error.errors[0].message
               }
             }
           };
           res.status(400).json(errorResponse);
           return;
         }
+        req.params = result.data;
       }
 
       next();
