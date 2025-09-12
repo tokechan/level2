@@ -9,7 +9,7 @@ import apiRoutes from './routes/index.js';
 import { swaggerSpec, swaggerOptions } from './utils/swagger.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Security middleware
 app.use(helmet());
