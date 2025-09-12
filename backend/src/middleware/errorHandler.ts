@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
-import { ErrorResponse } from '../types/api.js';
+import type { components } from '../types/api.js';
+
+type ErrorResponse = components['schemas']['ErrorResponse'];
 
 export interface AppError extends Error {
   statusCode?: number;
