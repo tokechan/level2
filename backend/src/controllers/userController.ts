@@ -9,10 +9,12 @@ type PaginationInfo = components['schemas']['PaginationInfo'];
 type ErrorResponse = components['schemas']['ErrorResponse'];
 import { prisma } from '../lib/prisma.js';
 import { CreateUserInput, UpdateUserInput, GetUserParams, GetUsersQuery } from '../schemas/userSchemas.js';
+import { transformUser, transformUsers } from '../utils/transformers.js';
+import { parseUserId, parseQueryParams } from '../utils/params.js';
 
 export const getUsers = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { page, limit, search } = req.query as GetUsersQuery;
+    const { page, limit, search } = parseQueryParams(req);
 
     // Build where clause for search
     const where = search ? {
@@ -45,7 +47,7 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
 
     const response: UsersResponse = {
       success: true,
-      data: users,
+      data: transformUsers(users),
       pagination,
       message: 'Users retrieved successfully'
     };
@@ -66,7 +68,7 @@ export const getUsers = async (req: Request, res: Response): Promise<void> => {
 
 export const getUserById = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params as GetUserParams;
+    const id = parseUserId(req);
 
     const user = await prisma.user.findUnique({
       where: { id }
@@ -86,7 +88,7 @@ export const getUserById = async (req: Request, res: Response): Promise<void> =>
 
     const response: UserResponse = {
       success: true,
-      data: user,
+      data: transformUser(user),
       message: 'User retrieved successfully'
     };
 
@@ -131,7 +133,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
 
     const response: UserResponse = {
       success: true,
-      data: newUser,
+      data: transformUser(newUser),
       message: 'User created successfully'
     };
 
@@ -151,7 +153,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
 
 export const updateUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params as GetUserParams;
+    const id = parseUserId(req);
     const updateData = req.body as UpdateUserInput;
 
     // Check if user exists
@@ -198,7 +200,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
 
     const response: UserResponse = {
       success: true,
-      data: updatedUser,
+      data: transformUser(updatedUser),
       message: 'User updated successfully'
     };
 
@@ -218,7 +220,7 @@ export const updateUser = async (req: Request, res: Response): Promise<void> => 
 
 export const deleteUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params as GetUserParams;
+    const id = parseUserId(req);
 
     // Check if user exists
     const existingUser = await prisma.user.findUnique({
