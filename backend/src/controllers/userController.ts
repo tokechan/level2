@@ -3,12 +3,10 @@ import type { components } from '../types/api.js';
 
 type UserResponse = components['schemas']['UserResponse'];
 type UsersResponse = components['schemas']['UsersResponse'];
-type CreateUserRequest = components['schemas']['CreateUserRequest'];
-type UpdateUserRequest = components['schemas']['UpdateUserRequest'];
 type PaginationInfo = components['schemas']['PaginationInfo'];
 type ErrorResponse = components['schemas']['ErrorResponse'];
 import { prisma } from '../lib/prisma.js';
-import { CreateUserInput, UpdateUserInput, GetUserParams, GetUsersQuery } from '../schemas/userSchemas.js';
+import { CreateUserInput, UpdateUserInput } from '../schemas/userSchemas.js';
 import { transformUser, transformUsers } from '../utils/transformers.js';
 import { parseUserId, parseQueryParams } from '../utils/params.js';
 
