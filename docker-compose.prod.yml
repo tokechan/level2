@@ -1,0 +1,124 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    container_name: simple-crud-mysql-prod
+    restart: unless-stopped
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-secure_password}
+      MYSQL_DATABASE: simple_crud_db
+      MYSQL_USER: simple_crud
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secure_password}
+    volumes:
+      - mysql_prod_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - simple-crud-network
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          'root',
+          '-p${MYSQL_ROOT_PASSWORD:-secure_password}',
+        ]
+      timeout: 20s
+      retries: 10
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: runner
+    container_name: simple-crud-backend-prod
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: mysql://simple_crud:${MYSQL_PASSWORD:-secure_password}@mysql:3306/simple_crud_db
+      PORT: 3000
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - simple-crud-network
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:3000/health',
+        ]
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Frontend React App
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: runner
+    container_name: simple-crud-frontend-prod
+    restart: unless-stopped
+    ports:
+      - '80:80'
+    environment:
+      VITE_API_URL: http://localhost:3000
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - simple-crud-network
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost/health',
+        ]
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Nginx Reverse Proxy (Optional)
+  nginx:
+    image: nginx:alpine
+    container_name: simple-crud-nginx-prod
+    restart: unless-stopped
+    ports:
+      - '443:443'
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - simple-crud-network
+
+volumes:
+  mysql_prod_data:
+    driver: local
+
+networks:
+  simple-crud-network:
+    driver: bridge

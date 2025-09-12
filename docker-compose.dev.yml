@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    build:
+      context: ./mysql
+      dockerfile: Dockerfile
+    container_name: simple-crud-mysql-dev
+    restart: unless-stopped
+    ports:
+      - '3307:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: simple_crud_db
+      MYSQL_USER: simple_crud
+      MYSQL_PASSWORD: password
+    volumes:
+      - mysql_dev_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - simple-crud-network
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          'root',
+          '-ppassword',
+        ]
+      timeout: 20s
+      retries: 10
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: dev-deps
+    container_name: simple-crud-backend-dev
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: mysql://simple_crud:password@mysql:3306/simple_crud_db
+      PORT: 3000
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - backend_dev_data:/app/dist
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - simple-crud-network
+    command: sh -c "npx prisma generate && npm run dev"
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:3000/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })",
+        ]
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Frontend React App
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: dev-deps
+    container_name: simple-crud-frontend-dev
+    restart: unless-stopped
+    ports:
+      - '5173:5173'
+    environment:
+      VITE_API_URL: http://localhost:3000
+      NODE_ENV: development
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - simple-crud-network
+    command: npm run dev -- --host 0.0.0.0
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:5173', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })",
+        ]
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # phpMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: simple-crud-phpmyadmin-dev
+    restart: unless-stopped
+    ports:
+      - '8080:80'
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: password
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - simple-crud-network
+
+volumes:
+  mysql_dev_data:
+    driver: local
+  backend_dev_data:
+    driver: local
+
+networks:
+  simple-crud-network:
+    driver: bridge
