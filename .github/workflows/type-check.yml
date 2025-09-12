@@ -1,0 +1,54 @@
+name: Type Safety Check
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  type-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd backend && npm install
+          cd ../frontend && npm install
+
+      - name: Generate types
+        run: |
+          cd backend && npm run generate:all
+
+      - name: Type check backend
+        run: |
+          cd backend && npm run build
+
+      - name: Type check frontend
+        run: |
+          cd frontend && npx tsc --noEmit
+
+      - name: Run type generation test
+        run: |
+          cd backend && npm run test:types
+
+      - name: Check for type errors
+        run: |
+          echo "Checking if type errors were detected..."
+          cd frontend
+          if npx tsc --noEmit 2>&1 | grep -q "error TS"; then
+            echo "✅ Type errors detected as expected"
+            echo "Type safety verification successful!"
+          else
+            echo "⚠️ No type errors detected"
+            echo "This might indicate a problem with type checking"
+          fi

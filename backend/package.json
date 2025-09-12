@@ -10,6 +10,7 @@
     "generate:types": "openapi-typescript openapi.yaml -o ./src/types/api.ts",
     "generate:frontend-types": "openapi-typescript openapi.yaml -o ../frontend/src/types/api.ts",
     "generate:all": "npm run generate:types && npm run generate:frontend-types",
+    "test:types": "node scripts/type-generation-test.js",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
